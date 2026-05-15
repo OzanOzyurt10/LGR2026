@@ -28,7 +28,8 @@ static double lat = 0, lon = 0;
 
 void setup() {
   DebugSerial.begin(9600);
-  GPSSerial.begin(115200); 
+  GPSSerial.begin(115200);
+  
 
   SPI_Baro1.begin(); SPI_Baro2.begin(); SPI_IMU1.begin(); SPI_IMU2.begin();
   
@@ -38,7 +39,10 @@ void setup() {
 
   
   if (myGPS.begin(GPSSerial)) {
-    myGPS.setNavigationFrequency(10); 
+    myGPS.setSerialRate(115200);        // 1) Modülü hızlandır
+    delay(100);
+    myGPS.setNavigationFrequency(10);   // 3) 10 Hz ayarla
+    myGPS.setAutoPVT(true);             // 4) Non-blocking mod
     DebugSerial.println("[OK] GPS Hazir.");
   }
 
@@ -60,6 +64,7 @@ void loop() {
   if (myGPS.getPVT()) {
     lat = myGPS.getLatitude() / 10000000.0;
     lon = myGPS.getLongitude() / 10000000.0;
+    myGPS.flushPVT();
   }
 
  
