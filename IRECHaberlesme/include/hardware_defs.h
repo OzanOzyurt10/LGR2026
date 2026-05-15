@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-// --- BAROMETRELER ---
+// --- BAROMETRELER (SPI) ---
 #define BARO1_SCK   PC10
 #define BARO1_MISO  PC11
 #define BARO1_MOSI  PB2
@@ -14,7 +14,7 @@
 #define BARO2_MOSI  PB15
 #define BARO2_CS    PB12
 
-// --- IMU (ICM-42688-P) ---
+// --- IMU (SPI) ---
 #define IMU1_SCK    PA5
 #define IMU1_MISO   PA6
 #define IMU1_MOSI   PA7
@@ -24,6 +24,16 @@
 #define IMU2_MISO   PE13
 #define IMU2_MOSI   PE14
 #define IMU2_CS     PE11
+
+// --- MAGNETOMETRELER (I2C) ---
+#define MAG1_SCL    PB6
+#define MAG1_SDA    PB7
+#define MAG2_SCL    PB10
+#define MAG2_SDA    PB11
+
+// --- GPS ---
+#define GPS_TX      PD5
+#define GPS_RX      PD6
 
 // --- DİĞER ---
 #define BUZZER      PE1
