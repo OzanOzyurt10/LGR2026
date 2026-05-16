@@ -5,8 +5,8 @@
 
 // ========================================================
 // SENSÖR SEÇİM PANELİ 
-#define AKTIF_BARO Baro2
-#define AKTIF_IMU  IMU2    
+#define AKTIF_BARO Baro1
+#define AKTIF_IMU  IMU1    
 // ========================================================
 
 HardwareSerial DebugSerial(RX_PIN, TX_PIN);
@@ -27,25 +27,22 @@ SFE_UBLOX_GNSS myGPS;
 static double lat = 0, lon = 0;
 
 void setup() {
-  DebugSerial.begin(9600);
+  DebugSerial.begin(115200);
+  
   GPSSerial.begin(115200);
+  delay(100);
   
-
   SPI_Baro1.begin(); SPI_Baro2.begin(); SPI_IMU1.begin(); SPI_IMU2.begin();
-  
   Baro1.begin(); Baro2.begin();
   IMU1.begin(); IMU2.begin();
-  
 
-  
   if (myGPS.begin(GPSSerial)) {
-    myGPS.setSerialRate(115200);        // 1) Modülü hızlandır
-    delay(100);
-    myGPS.setNavigationFrequency(10);   // 3) 10 Hz ayarla
-    myGPS.setAutoPVT(true);             // 4) Non-blocking mod
+    myGPS.setNavigationFrequency(10);
+    myGPS.setAutoPVT(true);
     DebugSerial.println("[OK] GPS Hazir.");
+} else {
+    DebugSerial.println("[HATA] GPS bulunamadi!");
   }
-
 
   pinMode(BUZZER, OUTPUT);
   for(int i=0; i<3; i++) { tone(BUZZER, 2731); delay(80); noTone(BUZZER); delay(80); }
@@ -64,7 +61,6 @@ void loop() {
   if (myGPS.getPVT()) {
     lat = myGPS.getLatitude() / 10000000.0;
     lon = myGPS.getLongitude() / 10000000.0;
-    myGPS.flushPVT();
   }
 
  
