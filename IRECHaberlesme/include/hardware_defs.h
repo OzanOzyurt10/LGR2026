@@ -35,6 +35,15 @@
 #define GPS_TX      PD5
 #define GPS_RX      PD6
 
+// --- LoRa ---
+#define LORA_M0     PC5
+#define LORA_M1     PB0
+#define LORA_AUX    PB1
+#define LORA_RX     PD9
+#define LORA_TX     PD8
+
+
+
 // --- DİĞER ---
 #define BUZZER      PE1
 #define RX_PIN      PE7

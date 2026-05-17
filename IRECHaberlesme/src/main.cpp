@@ -1,6 +1,7 @@
 #include "../include/hardware_defs.h"
 #include "../include/MS5607_SPI.h"
 #include "../include/ICM42688_SPI.h"
+#include "../include/lora.h" 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h> 
 
 // ========================================================
@@ -9,6 +10,7 @@
 #define AKTIF_IMU  IMU1    
 // ========================================================
 
+// Sadece main.cpp içinde tanımlı seri portlar
 HardwareSerial DebugSerial(RX_PIN, TX_PIN);
 HardwareSerial GPSSerial(GPS_RX, GPS_TX); 
 
@@ -17,7 +19,6 @@ SPIClass SPI_Baro2(BARO2_MOSI, BARO2_MISO, BARO2_SCK);
 SPIClass SPI_IMU1(IMU1_MOSI, IMU1_MISO, IMU1_SCK);
 SPIClass SPI_IMU2(IMU2_MOSI, IMU2_MISO, IMU2_SCK);
 
-
 MS5607 Baro1(&SPI_Baro1, BARO1_CS);
 MS5607 Baro2(&SPI_Baro2, BARO2_CS);
 ICM42688 IMU1(&SPI_IMU1, IMU1_CS);
@@ -25,11 +26,15 @@ ICM42688 IMU2(&SPI_IMU2, IMU2_CS);
 
 SFE_UBLOX_GNSS myGPS;
 static double lat = 0, lon = 0;
+static uint32_t loraTimer = 0;
 
 void setup() {
   DebugSerial.begin(115200);
+
+  pinMode(BUZZER, OUTPUT);
+  for(int i=0; i<3; i++) { tone(BUZZER, 2731); delay(80); noTone(BUZZER); delay(80); }
   
-  GPSSerial.begin(115200);
+  GPSSerial.begin(38400);
   delay(100);
   
   SPI_Baro1.begin(); SPI_Baro2.begin(); SPI_IMU1.begin(); SPI_IMU2.begin();
@@ -40,29 +45,35 @@ void setup() {
     myGPS.setNavigationFrequency(10);
     myGPS.setAutoPVT(true);
     DebugSerial.println("[OK] GPS Hazir.");
-} else {
+  } else {
     DebugSerial.println("[HATA] GPS bulunamadi!");
   }
 
-  pinMode(BUZZER, OUTPUT);
-  for(int i=0; i<3; i++) { tone(BUZZER, 2731); delay(80); noTone(BUZZER); delay(80); }
+  if (loraBaslat()) {                               
+    DebugSerial.println("[OK] LoRa Hazir.");
+  } else {
+    DebugSerial.println("[HATA] LoRa yanitlamadi!");
+  }
 }
 
 void loop() {
   float p, t, alt, ax, ay, az, gx, gy, gz;
-  
+  uint8_t fix = myGPS.getFixType();
   
   AKTIF_BARO.read(p, t);
   alt = AKTIF_BARO.getAltitude(p);
   AKTIF_IMU.read(ax, ay, az, gx, gy, gz);
- 
 
-  
   if (myGPS.getPVT()) {
     lat = myGPS.getLatitude() / 10000000.0;
     lon = myGPS.getLongitude() / 10000000.0;
   }
-
+    
+  if (millis() - loraTimer >= 500) { 
+    loraTimer = millis();
+    loraGonder(alt, gx, gy, gz, lat, lon, fix);
+    DebugSerial.println("LoRa Paketi Gonderildi.");
+  }
  
   DebugSerial.print("ALT:"); DebugSerial.print(alt);
   DebugSerial.print(" | GPS:"); DebugSerial.print(lat, 6);
@@ -71,5 +82,5 @@ void loop() {
   DebugSerial.print(" GY:"); DebugSerial.print(gy);
   DebugSerial.print(" GZ:"); DebugSerial.println(gz);
 
-  delay(10); 
+  delay(100); 
 }
