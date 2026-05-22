@@ -30,6 +30,7 @@
 #define MAG1_SDA    PB7
 #define MAG2_SCL    PB10
 #define MAG2_SDA    PB11
+#define MAG2_OFFSET 73.7f 
 
 // --- GPS ---
 #define GPS_TX      PD5
@@ -48,5 +49,6 @@
 #define BUZZER      PE1
 #define RX_PIN      PE7
 #define TX_PIN      PE8
+
 
 #endif
